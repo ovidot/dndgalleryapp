@@ -11,17 +11,7 @@ import { redirect, useRouter } from "next/navigation";
 const Login = () => {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [user, setUser] = useState({});
-
-  onAuthStateChanged(auth, (updateCurrentUser) => {
-    setUser(updateCurrentUser);
-  });
-
-  useEffect(() => {
-    if (!user) {
-      redirect("/");
-    }
-  }, []);
+  const router = useRouter();
 
   const login = async () => {
     try {
@@ -30,6 +20,7 @@ const Login = () => {
         loginEmail,
         loginPassword
       );
+      router.push("/");
       console.log(user);
     } catch (error) {
       console.log(error.message);

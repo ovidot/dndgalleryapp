@@ -15,20 +15,9 @@ export default function Home() {
   onAuthStateChanged(auth, (updateCurrentUser) => {
     setUser(updateCurrentUser);
   });
-  // const sendProps = () => {
-  //   Router.push({
-  //     pathname: "/auth",
-  //     query: {
-  //       user,
-  //     },
-  //   });
-  // };
-  // sendProps();
   if (!user) {
     redirect("/auth");
   }
-  useEffect(() => {}, []);
-
   const logout = async () => {
     await signOut(auth);
   };

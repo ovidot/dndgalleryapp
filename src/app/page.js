@@ -5,7 +5,6 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { auth } from "./firebase-config";
 import { onAuthStateChanged, signOut, updateCurrentUser } from "firebase/auth";
 import { redirect } from "next/navigation";
-import { Router } from "next/router";
 
 export default function Home() {
   const [imageList, setImageList] = useState([]);
@@ -84,12 +83,12 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center mx-auto border border-black max-w-7xl p-3 lg:p-12">
+    <main className="flex min-h-screen flex-col items-center mx-auto border  max-w-7xl p-3 lg:p-12">
       <div className="items center w-full justify-center flex text-5xl text-gray-900 font-serif underline font-bold p-4">
         IMAGE GALLERY
       </div>
-      <div className="">{user?.email}</div>
-      <div className="w-full border flex justify-center">
+      <div className="">Email: {user?.email}</div>
+      <div className="w-full  flex justify-center">
         <form
           className="w-full flex justify-center"
           action="submit"
@@ -99,11 +98,16 @@ export default function Home() {
             ref={searchInput}
             type="text"
             id="search"
-            placeholder="Search"
+            placeholder="Search Any Title"
             className="bg-transparent border border-gray-500 text-gray-950 rounded-lg  focus:ring-blue-500 focus:border-blue-500 block w-[50%] text-sm p-2.5"
           />
         </form>
-        <button onClick={logout}>logout</button>
+        <button
+          onClick={logout}
+          className="bg-gray-500 p-3 rounded-lg hover:scale-110"
+        >
+          logout
+        </button>
       </div>
       <DragDropContext onDragEnd={handleDragDrop}>
         <Droppable droppableId={"ROOT"} type="group">
@@ -137,7 +141,7 @@ export default function Home() {
                         placeholder="blur"
                         alt=""
                         priority={true}
-                        className="object-contain"
+                        className="object-cover"
                         onLoad={() => handleImageLoad(index)} // Call handleImageLoad when image finishes loading
                       />
                     </div>
@@ -167,7 +171,7 @@ export default function Home() {
                           placeholder="blur"
                           alt=""
                           priority={true}
-                          className="object-contain"
+                          className="object-cover"
                           onLoad={() => handleImageLoad(index)} // Call handleImageLoad when image finishes loading
                         />
                       </div>

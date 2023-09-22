@@ -28,7 +28,8 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center mx-auto border border-black max-w-7xl p-3 lg:p-12 gap-3 justify-center">
+    <div className="flex min-h-screen flex-col items-center mx-auto border  max-w-7xl p-3 lg:p-12 gap-3 justify-center">
+      <div className="font-sans font-bold text-5xl p-4">Ovidot Gallery</div>
       <input
         type="email"
         placeholder="email"

@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { auth } from "./firebase-config";
 import { onAuthStateChanged, signOut, updateCurrentUser } from "firebase/auth";
@@ -11,6 +11,10 @@ export default function Home() {
   const [imageList, setImageList] = useState([]);
   const [loading, setLoading] = useState([]);
   const [user, setUser] = useState({});
+  const [searchList, setSearchList] = useState([]);
+  const [loadingImages, setLoadingImages] = useState([]);
+  const searchInput = useRef(null);
+  const API_URL = "https://api.unsplash.com/search/photos";
 
   onAuthStateChanged(auth, (updateCurrentUser) => {
     setUser(updateCurrentUser);
@@ -21,6 +25,11 @@ export default function Home() {
   const logout = async () => {
     await signOut(auth);
   };
+  const handleImageLoad = (index) => {
+    setLoadingImages((prev) =>
+      prev.map((loadState, i) => (i === index ? false : loadState))
+    );
+  };
   const getImages = () => {
     fetch(
       "https://api.unsplash.com/photos?client_id=QqS80NOR-3daH8m2u1cLFemGgRWBU9Ul8a3JXAVA4zU"
@@ -28,9 +37,30 @@ export default function Home() {
       .then((res) => res.json())
       .then((json) => setImageList(json))
       .catch((err) => console.error("error:" + err));
+    setLoading(false);
   };
   useEffect(() => {
     getImages();
+  }, []);
+
+  const handleSearch = (event) => {
+    event.preventDefault();
+    console.log(searchInput.current.value);
+    getSearchImages();
+    searchInput.current.value = ""; // Clear the search input field
+  };
+  const getSearchImages = () => {
+    fetch(
+      `${API_URL}?query=${searchInput.current.value}&client_id=QqS80NOR-3daH8m2u1cLFemGgRWBU9Ul8a3JXAVA4zU`
+    )
+      .then((res) => res.json())
+      .then((json) => setSearchList(json.results))
+      .catch((err) => console.error("error:" + err));
+    setLoading(false);
+  };
+  console.log(searchList.results);
+  useEffect(() => {
+    getSearchImages();
   }, []);
 
   const handleDragDrop = (results) => {
@@ -60,12 +90,19 @@ export default function Home() {
       </div>
       <div className="">{user?.email}</div>
       <div className="w-full border flex justify-center">
-        <input
-          type="text"
-          id="search"
-          placeholder="Search"
-          className="bg-transparent border border-gray-500 text-gray-950 rounded-lg  focus:ring-blue-500 focus:border-blue-500 block w-[50%] text-sm p-2.5"
-        />
+        <form
+          className="w-full flex justify-center"
+          action="submit"
+          onSubmit={handleSearch}
+        >
+          <input
+            ref={searchInput}
+            type="text"
+            id="search"
+            placeholder="Search"
+            className="bg-transparent border border-gray-500 text-gray-950 rounded-lg  focus:ring-blue-500 focus:border-blue-500 block w-[50%] text-sm p-2.5"
+          />
+        </form>
         <button onClick={logout}>logout</button>
       </div>
       <DragDropContext onDragEnd={handleDragDrop}>
@@ -77,6 +114,36 @@ export default function Home() {
               ref={provided.innerRef}
             >
               {provided.placeholder}
+              {searchList.map((result, index) => (
+                <Draggable
+                  key={result.id}
+                  draggableId={result.id}
+                  index={index}
+                >
+                  {(provided) => (
+                    <div
+                      {...provided.dragHandleProps}
+                      {...provided.draggableProps}
+                      {...provided.placeholder}
+                      ref={provided.innerRef}
+                      className=" p-5  justify-center flex min-w-[150px] max-w-[400px] min-h[150px] max-h-[300px] flex-shrink-0 "
+                    >
+                      {loadingImages[index] && <div>Loading...</div>}
+                      <Image
+                        src={result.urls.regular}
+                        height={1000}
+                        width={1000}
+                        blurDataURL={result.urls.thumb}
+                        placeholder="blur"
+                        alt=""
+                        priority={true}
+                        className="object-contain"
+                        onLoad={() => handleImageLoad(index)} // Call handleImageLoad when image finishes loading
+                      />
+                    </div>
+                  )}
+                </Draggable>
+              ))}
               {React.Children.toArray(
                 imageList.map((items, index) => (
                   <Draggable
@@ -90,15 +157,18 @@ export default function Home() {
                         {...provided.draggableProps}
                         {...provided.placeholder}
                         ref={provided.innerRef}
-                        className="p-5  justify-center flex min-w-[150px] max-w-[400px] min-h[150px] max-h-[300px] flex-shrink-0 "
+                        className=" p-5  justify-center flex min-w-[150px] max-w-[400px] min-h[150px] max-h-[300px] flex-shrink-0 "
                       >
                         <Image
                           src={items.urls.regular}
                           height={1000}
                           width={1000}
+                          blurDataURL={items.urls.thumb}
+                          placeholder="blur"
                           alt=""
                           priority={true}
                           className="object-contain"
+                          onLoad={() => handleImageLoad(index)} // Call handleImageLoad when image finishes loading
                         />
                       </div>
                     )}
